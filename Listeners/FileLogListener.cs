@@ -5,6 +5,7 @@ using LoggerApp.Models;
 
 public class FileLogListener : ILogListener
 {
+    private const int FlushInterval = 5000;
     private readonly string _filePath;
     private readonly Channel<LogEntry> _channel;
 
@@ -17,21 +18,25 @@ public class FileLogListener : ILogListener
         });
     }
 
-    public void Notify(LogEntry entry)
-    {
-        _channel.Writer.TryWrite(entry);
-    }
+    public void Notify(LogEntry entry) => _channel.Writer.TryWrite(entry);
+    public void Complete() => _channel.Writer.Complete();
 
     public async Task StartAsync(CancellationToken cancellationToken)
     {
         await using var writer = new StreamWriter(_filePath, append: true);
+        var count = 0;
 
         await foreach (var entry in _channel.Reader.ReadAllAsync(cancellationToken))
         {
             await writer.WriteLineAsync(entry.ToString());
-            await writer.FlushAsync(cancellationToken);
-        }
-    }
+            count++;
 
-    public void Complete() => _channel.Writer.Complete();
+            if (count % FlushInterval == 0)
+            {
+                await writer.FlushAsync(cancellationToken);
+            }
+        }
+
+        await writer.FlushAsync(cancellationToken);
+    }
 }
