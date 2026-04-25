@@ -1,1 +1,1 @@
-﻿Console.WriteLine("Hello, World!");
+﻿await new LoggerApp.Application().RunAsync();
