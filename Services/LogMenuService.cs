@@ -6,7 +6,7 @@ using LoggerApp.Models;
 
 public class LogMenuService(ILogger logger, ConsoleLogListener consoleListener)
 {
-    private const string LogFilePath = "logs.txt";
+    private const string LogFilePath = "logs_save.txt";
 
     public async Task RunAsync()
     {

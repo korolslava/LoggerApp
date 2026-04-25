@@ -6,7 +6,8 @@ using LoggerApp.Services;
 
 public class Application
 {
-    private const string LogFilePath = "logs.txt";
+    private const string SaveFilePath = "logs_save.json";
+    private const string StreamFilePath = "logs_stream.txt";
     private const int TotalLogs = 2_000_000;
     private const int GeneratorThreads = 8;
 
@@ -14,7 +15,7 @@ public class Application
     {
         using var cts = new CancellationTokenSource();
 
-        var fileListener = new FileLogListener(LogFilePath);
+        var fileListener = new FileLogListener(StreamFilePath);
         var consoleListener = new ConsoleLogListener();
         var listeners = new List<ILogListener> { fileListener, consoleListener };
 
