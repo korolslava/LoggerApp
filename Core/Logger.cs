@@ -18,7 +18,7 @@ public class Logger : ILogger
 
     public void AddLog(LogLevel level, string message)
     {
-        var entry = new LogEntry(DateTime.Now, level, message);
+        var entry = LogEntry.Create(level, message);
 
         lock (_lock)
         {
@@ -31,16 +31,17 @@ public class Logger : ILogger
         }
     }
 
-    public void DeleteLog(int index)
+    public void DeleteLog(Guid id)
     {
         lock (_lock)
         {
-            if (index < 0 || index >= _logs.Count)
+            var entry = _logs.FirstOrDefault(l => l.Id == id);
+            if (entry is null)
             {
-                Console.WriteLine("Invalid index.");
+                Console.WriteLine("Log not found.");
                 return;
             }
-            _logs.RemoveAt(index);
+            _logs.Remove(entry);
         }
     }
 
@@ -115,6 +116,6 @@ public class Logger : ILogger
         if (!DateTime.TryParse(parts[0], out var dt)) return null;
         if (!Enum.TryParse<LogLevel>(parts[1], out var level)) return null;
 
-        return new LogEntry(dt, level, parts[2]);
+        return new LogEntry(Guid.NewGuid(), dt, level, parts[2]);
     }
 }

@@ -78,13 +78,14 @@ public class LogMenuService(ILogger logger, ConsoleLogListener consoleListener)
 
     private void HandleDelete()
     {
-        Console.Write("Index to delete: ");
-        if (!int.TryParse(Console.ReadLine(), out var index))
+        Console.Write("Log ID to delete: ");
+        if (!Guid.TryParse(Console.ReadLine(), out var id))
         {
-            Console.WriteLine("Invalid index.");
+            Console.WriteLine("Invalid ID.");
             return;
         }
-        logger.DeleteLog(index);
+        logger.DeleteLog(id);
+        Console.WriteLine("Log deleted.");
     }
 
     private void HandleFilter()
@@ -118,9 +119,9 @@ public class LogMenuService(ILogger logger, ConsoleLogListener consoleListener)
         }
 
         Console.WriteLine($"\n--- {logs.Count:N0} logs ---");
-        foreach (var (entry, index) in logs.Select((e, i) => (e, i)))
+        foreach (var entry in logs)
         {
-            Console.WriteLine($"[{index}] {entry}");
+            Console.WriteLine($"[{entry.Id}] {entry}");
         }
         Console.WriteLine("---");
     }
