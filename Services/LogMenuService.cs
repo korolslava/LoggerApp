@@ -108,6 +108,22 @@ public class LogMenuService(ILogger logger, ConsoleLogListener consoleListener)
         logger.SetFilterLevel(level);
     }
 
+    private static void WriteColoredLog(LogEntry entry)
+    {
+        var color = entry.Level switch
+        {
+            LogLevel.Debug => ConsoleColor.Gray,
+            LogLevel.Info => ConsoleColor.Cyan,
+            LogLevel.Warning => ConsoleColor.Yellow,
+            LogLevel.Error => ConsoleColor.Red,
+            _ => ConsoleColor.White
+        };
+
+        Console.ForegroundColor = color;
+        Console.WriteLine($"[{entry.Id}] {entry}");
+        Console.ResetColor();
+    }
+
     private void HandlePrint()
     {
         var logs = logger.GetLogs();
@@ -119,10 +135,12 @@ public class LogMenuService(ILogger logger, ConsoleLogListener consoleListener)
         }
 
         Console.WriteLine($"\n--- {logs.Count:N0} logs ---");
+
         foreach (var entry in logs)
         {
-            Console.WriteLine($"[{entry.Id}] {entry}");
+            WriteColoredLog(entry);
         }
+
         Console.WriteLine("---");
     }
 
