@@ -6,8 +6,8 @@ using LoggerApp.Services;
 
 public class Application
 {
-    private const string SaveFilePath = "logs_save.json";
-    private const string StreamFilePath = "logs_stream.txt";
+    private const string SaveFilePath = "../../../Data/logs_save.json";
+    private const string StreamFilePath = "../../../Data/logs_stream.txt";
     private const int TotalLogs = 2_000_000;
     private const int GeneratorThreads = 8;
 

@@ -56,12 +56,7 @@ public class LogMenuService(ILogger logger, ConsoleLogListener consoleListener)
 
     private void HandleAdd()
     {
-        Console.Write("Level (Debug/Info/Warning/Error): ");
-        if (!Enum.TryParse<LogLevel>(Console.ReadLine(), ignoreCase: true, out var level))
-        {
-            Console.WriteLine("Invalid level.");
-            return;
-        }
+        var level = SelectLogLevel();
 
         Console.Write("Message: ");
         var message = Console.ReadLine();
@@ -74,6 +69,60 @@ public class LogMenuService(ILogger logger, ConsoleLogListener consoleListener)
 
         logger.AddLog(level, message);
         Console.WriteLine("Log added.");
+    }
+
+    private static LogLevel SelectLogLevel()
+    {
+        var levels = Enum.GetValues<LogLevel>();
+        var selectedIndex = 0;
+
+        Console.WriteLine("Select log level:");
+
+        while (true)
+        {
+            var startTop = Console.CursorTop;
+
+            for (var i = 0; i < levels.Length; i++)
+            {
+                Console.SetCursorPosition(0, startTop + i);
+
+                if (i == selectedIndex)
+                {
+                    Console.ForegroundColor = ConsoleColor.Green;
+                    Console.Write($"> {levels[i]}");
+                    Console.ResetColor();
+                }
+                else
+                {
+                    Console.Write($"  {levels[i]}");
+                }
+
+                Console.Write(new string(' ', 20));
+            }
+
+            var key = Console.ReadKey(intercept: true).Key;
+
+            if (key == ConsoleKey.UpArrow)
+            {
+                selectedIndex = selectedIndex == 0
+                    ? levels.Length - 1
+                    : selectedIndex - 1;
+            }
+            else if (key == ConsoleKey.DownArrow)
+            {
+                selectedIndex = selectedIndex == levels.Length - 1
+                    ? 0
+                    : selectedIndex + 1;
+            }
+            else if (key == ConsoleKey.Enter)
+            {
+                Console.SetCursorPosition(0, startTop + levels.Length);
+                Console.WriteLine();
+                return levels[selectedIndex];
+            }
+
+            Console.SetCursorPosition(0, startTop);
+        }
     }
 
     private void HandleDelete()
