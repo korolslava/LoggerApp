@@ -21,6 +21,8 @@ public class Application
 
         var logger = new Logger(listeners);
 
+        await logger.StartAsync(cts.Token);
+
         var generator = new LogGeneratorService(logger);
         var menu = new LogMenuService(logger, consoleListener);
 
@@ -30,9 +32,29 @@ public class Application
 
         await menu.RunAsync();
 
-        await generationTask;
+        cts.Cancel();
+
+        try
+        {
+            await generationTask;
+        }
+        catch (OperationCanceledException)
+        {
+            // Generation was cancelled when user quit the app.
+        }
+
+        await logger.StopAsync();
+
         fileListener.Complete();
-        await fileListenerTask;
+
+        try
+        {
+            await fileListenerTask;
+        }
+        catch (OperationCanceledException)
+        {
+            // File listener was cancelled during shutdown.
+        }
 
         Console.WriteLine("All done. Goodbye!");
     }

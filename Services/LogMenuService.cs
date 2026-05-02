@@ -31,6 +31,9 @@ public class LogMenuService(ILogger logger, ConsoleLogListener consoleListener)
                 case "P":
                     HandlePrint();
                     break;
+                case "C":
+                    HandleSearch();
+                    break;
                 case "S":
                     await logger.SaveToFileAsync(LogFilePath);
                     break;
@@ -193,6 +196,81 @@ public class LogMenuService(ILogger logger, ConsoleLogListener consoleListener)
         Console.WriteLine("---");
     }
 
+    private void HandleSearch()
+    {
+        Console.Write("Keyword (leave empty for none): ");
+        var keyword = Console.ReadLine();
+
+        Console.Write("From date (yyyy-MM-dd or empty): ");
+        var fromInput = Console.ReadLine();
+
+        DateTime? from = null;
+
+        if (!string.IsNullOrWhiteSpace(fromInput))
+        {
+            if (DateTime.TryParse(fromInput, out var parsedFrom))
+            {
+                from = parsedFrom;
+            }
+            else
+            {
+                Console.WriteLine("Invalid from date. Ignoring.");
+            }
+        }
+
+        Console.Write("To date (yyyy-MM-dd or empty): ");
+        var toInput = Console.ReadLine();
+
+        DateTime? to = null;
+
+        if (!string.IsNullOrWhiteSpace(toInput))
+        {
+            if (DateTime.TryParse(toInput, out var parsedTo))
+            {
+                to = parsedTo;
+            }
+            else
+            {
+                Console.WriteLine("Invalid to date. Ignoring.");
+            }
+        }
+
+        Console.Write("Minimum level (Debug/Info/Warning/Error or ALL): ");
+        var levelInput = Console.ReadLine();
+
+        LogLevel? minLevel = null;
+
+        if (!string.IsNullOrWhiteSpace(levelInput) &&
+            !string.Equals(levelInput, "ALL", StringComparison.OrdinalIgnoreCase))
+        {
+            if (Enum.TryParse<LogLevel>(levelInput, ignoreCase: true, out var parsedLevel))
+            {
+                minLevel = parsedLevel;
+            }
+            else
+            {
+                Console.WriteLine("Invalid level. Ignoring.");
+            }
+        }
+
+        var results = logger.SearchLogs(keyword, from, to, minLevel);
+
+        if (results.Count == 0)
+        {
+            Console.WriteLine("No logs match the search criteria.");
+            return;
+        }
+
+        Console.WriteLine($"\n--- {results.Count:N0} matching logs ---");
+
+        foreach (var entry in results)
+        {
+            WriteColoredLog(entry);
+        }
+
+        Console.WriteLine("---");
+    }
+
     private static void PrintHelp()
     {
         Console.WriteLine("""
@@ -204,6 +282,7 @@ public class LogMenuService(ILogger logger, ConsoleLogListener consoleListener)
             ║  D - Delete log by index             ║
             ║  F - Change filter level             ║
             ║  P - Print logs                      ║
+            ║  C - Search logs                     ║
             ║  S - Save logs to file               ║
             ║  R - Read logs from file             ║
             ║  L - Toggle console listener         ║
